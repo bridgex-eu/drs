@@ -42,8 +42,8 @@ drs deploy -m MACHINE_IP -p [YOUR_DOMAIN]:SERVER_PORT:CONTAINER_PORT --name APP_
 ```
 
 > [!NOTE]
-> This command uses ssh-agent to connect to the machine. Alternatively, you can use DRS Keys instead of ssh-agent. See the Key Management section below for more details.
-> Use the -r flag to pull image on a remote server (e.g. from Docker Registry) instead of transferring it via SSH.
+> - DRS by default uses ssh-agent to connect to the machine. Alternatively, you can use DRS Keys instead of ssh-agent. See the Key Management section below for more details.
+> - Use the -r flag to pull image on a remote server (e.g. from Docker Registry) instead of transferring it via SSH.
 
 This command will:
 
@@ -72,7 +72,7 @@ drs do -m 125.23.43.110 myapp rm # remove an app
 You can manage your machines with DRS:
 
 ```
-drs machine add --name pluto --key-file ./pluto_rsa 123.43.10.120
+drs machine add --name pluto --key pluto-rsa 123.43.10.120
 ```
 
 Now you can access your machine by name in other commands: `drs do -m pluto ...`
@@ -82,7 +82,7 @@ Now you can access your machine by name in other commands: `drs do -m pluto ...`
 DRS also assists you with your SSH keys:
 
 ```
-drs key add --name pluto-key --passphrase passphrase ./pluto_rsa
+drs key add --name pluto-rsa --passphrase passphrase ./pluto_rsa
 ```
 
 To use this key to access your machines, use:
