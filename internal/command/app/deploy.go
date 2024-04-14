@@ -1,8 +1,10 @@
 package app
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/bridgex-eu/drs/internal/command"
@@ -42,6 +44,10 @@ func NewDeployCmd(drsCli *command.Cli) *cli.Command {
 				Usage:   "Environment variable",
 				Aliases: []string{"e"},
 			},
+			&cli.StringFlag{
+				Name:  "env-file",
+				Usage: "Read in a file of environment variables",
+			},
 			&cli.BoolFlag{
 				Name:    "yes",
 				Usage:   "Automatic yes to prompts; assume \"yes\" as answer to all prompts and run non-interactively.",
@@ -59,18 +65,19 @@ func NewDeployCmd(drsCli *command.Cli) *cli.Command {
 			ports := ctx.StringSlice("port")
 			volumes := ctx.StringSlice("volume")
 			envs := ctx.StringSlice("env")
+			envFile := ctx.String("env-file")
 			yes := ctx.Bool("yes")
 			remote := ctx.Bool("remote")
 
 			image := ctx.Args().First()
 			otherArgs := ctx.Args().Tail()
 
-			return runDeploy(drsCli, image, name, machine, ports, volumes, envs, yes, remote, otherArgs...)
+			return runDeploy(drsCli, image, name, machine, ports, volumes, envs, envFile, yes, remote, otherArgs...)
 		},
 	}
 }
 
-func runDeploy(drsCli *command.Cli, image, name, machine string, ports, volumes, envs []string, yes, remote bool, args ...string) error {
+func runDeploy(drsCli *command.Cli, image, name, machine string, ports, volumes, envs []string, envFile string, yes, remote bool, args ...string) error {
 	if image == "" {
 		return errors.New("Image cannot be an empty string.")
 	}
@@ -134,6 +141,14 @@ func runDeploy(drsCli *command.Cli, image, name, machine string, ports, volumes,
 		}
 	}
 
+	if envFile != "" {
+		envsFromFile, err := readEnvFile(envFile)
+		if err != nil {
+			return fmt.Errorf("Failed to read env file: %w", err)
+		}
+		envs = append(envs, envsFromFile...)
+	}
+
 	fmt.Fprintln(drsCli.Out, "Running a new app...")
 	if err := dockerhelper.RunContainer(client, image, name, adaptedPorts, volumes, traefikLabels, envs, args...); err != nil {
 		fmt.Fprintln(drsCli.Out, "Failed to run the new container, attempting to restart the previous one.")
@@ -160,6 +175,27 @@ func runDeploy(drsCli *command.Cli, image, name, machine string, ports, volumes,
 	fmt.Fprintf(drsCli.Out, "The app %s now runs on your machine.\n", name)
 
 	return nil
+}
+
+func readEnvFile(path string) ([]string, error) {
+	envs := []string{}
+
+	file, err := os.Open(path)
+	if err != nil {
+		return envs, fmt.Errorf("failed to read env file: %w", err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		envs = append(envs, strings.TrimSpace(scanner.Text()))
+	}
+
+	if err := scanner.Err(); err != nil {
+		return envs, fmt.Errorf("error while reading env file: %w", err)
+	}
+
+	return envs, nil
 }
 
 // Parse [domain.com]:serverport:containerport
