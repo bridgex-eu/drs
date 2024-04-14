@@ -53,7 +53,7 @@ This will:
 > [!NOTE]
 > To make your app available by your domain, you need to set A DNS record to IP of the machine.
 
-### App management
+### App Management
 
 To manage your apps, use drs do. This command proxies Docker commands to the machine. Example:
 
