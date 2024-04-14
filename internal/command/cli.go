@@ -17,7 +17,7 @@ type Cli struct {
 
 // MachineClient provides a client to interact with a machine
 func (c *Cli) MachineClient(machine string) (*MachineClient, error) {
-	m := c.Config.Machines().GetByNameOrHost(machine)
+	m := c.Config.Machines().GetOrDefault(machine)
 	if m == nil {
 		return nil, errors.New("Machine with this name or host not found")
 	}

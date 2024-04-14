@@ -64,7 +64,7 @@ func runAdd(drsCli *command.Cli, host, name, user, key string) error {
 		return errors.New("Host cannot be empty")
 	}
 
-	if machines.GetByNameOrHost(host) != nil || machines.GetByNameOrHost(name) != nil {
+	if machines.GetOrDefault(host) != nil || machines.GetOrDefault(name) != nil {
 		return errors.New("Machine with this host or name arleady exist")
 	}
 

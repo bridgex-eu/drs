@@ -85,7 +85,7 @@ func (c *MachinesConfig) Add(entry MachineEntry) error {
 }
 
 func (c *MachinesConfig) Remove(nameOrHost string) error {
-	machine := c.GetByNameOrHost(nameOrHost)
+	machine := c.GetOrDefault(nameOrHost)
 	if machine == nil {
 		return errors.New("Not found")
 	}
@@ -118,7 +118,7 @@ func (c *MachinesConfig) All() []MachineEntry {
 	return machines
 }
 
-func (c *MachinesConfig) GetByNameOrHost(nameOrHost string) *MachineEntry {
+func (c *MachinesConfig) GetOrDefault(nameOrHost string) *MachineEntry {
 	if c.Node.Kind != yaml.MappingNode {
 		return nil
 	}
@@ -138,5 +138,11 @@ func (c *MachinesConfig) GetByNameOrHost(nameOrHost string) *MachineEntry {
 		}
 	}
 
-	return nil
+	// creating default
+	host := net.ParseIP(nameOrHost)
+	if host == nil {
+		return nil
+	}
+
+	return &MachineEntry{Name: nameOrHost, Host: host}
 }

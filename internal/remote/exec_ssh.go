@@ -6,6 +6,7 @@ import (
 	"io"
 	"net"
 	"os"
+	"time"
 
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
@@ -93,6 +94,7 @@ func SshClient(host, user, private, passphrase string) (*ssh.Client, error) {
 			sshAuth,
 		},
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		Timeout:         time.Second * 5,
 	}
 
 	return ssh.Dial("tcp", host+":22", config)
