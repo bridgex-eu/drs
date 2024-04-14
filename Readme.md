@@ -13,6 +13,8 @@ It's a new, minimal deployment tool built on SSH and Docker. You can run and sha
 
 ## Installation
 
+See [releases](https://github.com/bridgex-eu/drs/releases) for pre-built binaries.
+
 On Unix:
 
 ```
@@ -36,22 +38,23 @@ go install -ldflags="-s -w" github.com/bridgex-eu/drs@latest
 ## How to use
 
 ```
-drs deploy -m MACHINE_IP -p [YOUR_DOMAIN]:SERVER_PORT:CONTAINER_PORT --name APP_NAME LOCAL_DOCKER_IMAGE
+drs deploy -m MACHINE_IP -p [YOUR_DOMAIN]:SERVER_PORT:CONTAINER_PORT --name APP_NAME DOCKER_IMAGE
 ```
 
-> [!TIP]
-> Use -r to pull your image on a remote server instead of sending it through SSH.
+> [!NOTE]
+> This command uses ssh-agent to connect to the machine. Alternatively, you can use DRS Keys instead of ssh-agent. See the Key Management section below for more details.
+> Use the -r flag to pull image on a remote server (e.g. from Docker Registry) instead of transferring it via SSH.
 
-This will:
+This command will:
 
 1. Install docker on remote machine
 2. Run traefik
 3. Create a docker network for drs apps
-4. Send your app image through SSH
+4. Send your app image through SSH or pull it from a registry (if -r flag is set)
 5. Run your app with traefik labels
 
-> [!NOTE]
-> To make your app available by your domain, you need to set A DNS record to IP of the machine.
+> [!TIP]
+> To make your app accessible from the internet, you need to set up a DNS record for your domain pointing to the machine's IP address. DRS will automatically generate a TLS certificate for your domain.
 
 ### App Management
 
